@@ -28,6 +28,7 @@ Getopt::Long::Configure ("bundling");
 my $result = GetOptions (
 	"c|command=s" => \$config{'command'},
 	"C|commandfile=s" => \$config{'commandfile'},
+	"P|prefixfile=s" => \$config{'prefixfile'},
 	"i|host=s" => \$config{'host'},
 	"I|hostfile=s" => \$config{'hostfile'},
 	"u|user=s" => \$config{'username'},
@@ -38,9 +39,15 @@ my $result = GetOptions (
 );
 
 my @commands;
+if ($config{'prefixfile'}) {
+	open (PREFIXFILE,"<$config{'prefixfile'}") or die ("cannot open prefix file: $!");
+	@commands=<PREFIXFILE>;
+	close (PREFIXFILE);
+}
 if ($config{'commandfile'}) {
 	open (COMMANDFILE,"<$config{'commandfile'}") or die ("cannot open commands file: $!");
-	@commands=<COMMANDFILE>;
+	my @cmds=<COMMANDFILE>;
+	push (@commands,@cmds);
 	close (COMMANDFILE);
 }
 
@@ -60,18 +67,12 @@ foreach my $host (@hosts) {
 	$ssh2->connect($host) or warn ("cannot connect to host $host: $!");
 	if ($ssh2->auth_password($config{'username'},$config{'password'})) {
 		my $chan = $ssh2->channel();
-		if ($config{'command'}) {
-			print STDERR "[$host] Command: ".$config{'$command'}."\n";
-			my $output = $chan->exec($config{'command'});
+		push @commands, $config{'command'} if ($config{'command'});	
+		foreach my $command (@commands) {
+			print STDERR "[$host] Command: $command\n";
+			my $output = $chan->exec($command);
 			print $output."\n";
-		} # if
-		if ($config{'commandfile'}) {
-			foreach my $command (@commands) {
-				print STDERR "[$host] Command: $command\n";
-				my $output = $chan->exec($command);
-				print $output."\n";
-			} # foreach
-		} # if
+		} # foreach
 	} # if
 } # foreach
 
