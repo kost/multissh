@@ -62,7 +62,7 @@ foreach my $host (@hosts) {
 		my $chan = $ssh2->channel();
 		if ($config{'command'}) {
 			print STDERR "[$host] Command: ".$config{'$command'}."\n";
-			my $output = $chan->exec($config{'command'})
+			my $output = $chan->exec($config{'command'});
 			print $output."\n";
 		} # if
 		if ($config{'commandfile'}) {
