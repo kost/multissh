@@ -82,6 +82,7 @@ sub help {
 	print "\n";
 	print " -c <s>	command to execute\n";
 	print " -C <s>	name of file with commands\n";
+	print " -P <s>	prefix of file with prefixed commands (useful for enable)\n";
 	print " -i <s>	IP to execute\n";
 	print " -I <s>	name of file with IPs to execute commands on\n";
 	print " -u <s>	Use username <s>\n";
