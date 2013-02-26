@@ -51,43 +51,29 @@ if ($config{'hostfile'}) {
 	close (HOSTFILE);
 }
 
-if ($config{'host'}) {
+push @hosts, $config{'host'} if ($config{'host'});
+
+foreach my $host (@hosts) {
+	print STDERR "Working on host: $host\n";
+
 	my $ssh2 = Net::SSH2->new();
-	$ssh2->connect($config{'host'}) or die ("cannot connect to host $config{'host'}: $!");
-	if ($ssh2->auth_password($config{'username'},$config{'password'})) {	
+	$ssh2->connect($host) or warn ("cannot connect to host $host: $!");
+	if ($ssh2->auth_password($config{'username'},$config{'password'})) {
 		my $chan = $ssh2->channel();
 		if ($config{'command'}) {
+			print STDERR "[$host] Command: ".$config{'$command'}."\n";
 			my $output = $chan->exec($config{'command'})
 			print $output."\n";
-		} 
+		} # if
 		if ($config{'commandfile'}) {
 			foreach my $command (@commands) {
+				print STDERR "[$host] Command: $command\n";
 				my $output = $chan->exec($command);
 				print $output."\n";
-			}
-		}
-	}
-}
-
-if ($config{'hostfile'}) {
-	foreach my $host (@hosts) {
-		my $ssh2 = Net::SSH2->new();
-		$ssh2->connect($host) or warn ("cannot connect to host $host: $!");
-		if ($ssh2->auth_password($config{'username'},$config{'password'})) {
-			my $chan = $ssh2->channel();
-			if ($config{'command'}) {
-				my $output = $chan->exec($config{'command'})
-				print $output."\n";
-			} # if
-			if ($config{'commandfile'}) {
-				foreach my $command (@commands) {
-					my $output = $chan->exec($command);
-					print $output."\n";
-				} # foreach
-			} # if
+			} # foreach
 		} # if
-	} # foreach
-} # if 
+	} # if
+} # foreach
 
 sub help {
 	print "Multi-SSH. Copyright (C) Kost. Distributed under GPL.\n\n";
