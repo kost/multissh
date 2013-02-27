@@ -59,6 +59,7 @@ if ($config{'hostfile'}) {
 }
 
 push @hosts, $config{'host'} if ($config{'host'});
+push @commands, $config{'command'} if ($config{'command'});	
 
 foreach my $host (@hosts) {
 	print STDERR "Working on host: $host\n";
@@ -67,13 +68,13 @@ foreach my $host (@hosts) {
 	$ssh2->connect($host) or warn ("cannot connect to host $host: $!");
 	if ($ssh2->auth_password($config{'username'},$config{'password'})) {
 		my $chan = $ssh2->channel();
-		push @commands, $config{'command'} if ($config{'command'});	
 		foreach my $command (@commands) {
 			print STDERR "[$host] Command: $command\n";
 			my $output = $chan->exec($command);
 			print $output."\n";
 		} # foreach
 	} # if
+	$ssh2->disconnect();
 } # foreach
 
 sub help {
